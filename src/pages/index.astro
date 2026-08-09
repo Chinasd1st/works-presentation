@@ -80,6 +80,14 @@ const heroLetters = siteConfig.title
   </section>
 </Layout>
 
+<noscript>
+  <style is:inline>
+    .hero-letter {
+      opacity: 1;
+    }
+  </style>
+</noscript>
+
 <style>
   .hero {
     padding-block: clamp(64px, 14vh, 160px) var(--space-9);
@@ -91,6 +99,16 @@ const heroLetters = siteConfig.title
 
   .hero-letter {
     display: inline-block;
+    /* Hidden until JS swaps in the scramble glyphs, so the plain title
+       is never shown before the animation. Restored via reduced-motion.
+       动画前隐藏字母：JS 先写入乱码再解码，避免先展示正常标题。 */
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-letter {
+      opacity: 1;
+    }
   }
 
   .hero-space {
@@ -129,6 +147,7 @@ const heroLetters = siteConfig.title
   .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    align-items: start;
     gap: var(--space-7) var(--space-6);
   }
 
@@ -139,3 +158,50 @@ const heroLetters = siteConfig.title
     }
   }
 </style>
+
+<script>
+  import { animate, scrambleText } from 'animejs';
+
+  // Official anime.js scrambleText entrance: each hero letter starts as
+  // random glyphs, then decodes to its real character one by one
+  // (typewriter-like, left to right).
+  // 官方 scrambleText 入场：每个字母先显示乱码，随后逐字解码为正常字符（打字机效果）。
+  //
+  // Letters are hidden in CSS until this runs: JS swaps in random glyphs
+  // before the animation so the plain title is never shown on first paint.
+  // settleDuration stays well below duration (settleRatio << 1): with a
+  // single character + perturbation, a settle time past the animation end
+  // leaves the letter stuck on a random glyph. Only run via astro:page-load —
+  // it also fires on initial load, so calling heroTypo() again would start a
+  // second scramble on the same elements and clobber the final value.
+  function heroTypo() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const letters = Array.from(document.querySelectorAll<HTMLElement>('.hero-letter'));
+    if (letters.length === 0) return;
+    const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&@';
+    letters.forEach((el, i) => {
+      const target = el.textContent ?? '';
+      el.textContent = Array.from(
+        { length: target.length },
+        () => glyphs[Math.floor(Math.random() * glyphs.length)],
+      ).join('');
+      el.style.opacity = '1';
+      animate(el, {
+        innerHTML: scrambleText({
+          text: target,
+          chars: 'a-zA-Z0-9#%&@',
+          from: 'left',
+          revealRate: 50,
+          settleRate: 30,
+          settleDuration: 300,
+          perturbation: 0.3,
+          duration: 1200,
+          delay: i * 70,
+        }),
+      });
+    });
+  }
+
+  // Fires on initial load AND after every navigation (no direct call needed).
+  document.addEventListener('astro:page-load', heroTypo);
+</script>
