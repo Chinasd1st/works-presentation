@@ -2,6 +2,7 @@
 // Work card used on the homepage and the works index.
 // 作品卡片（首页/作品列表复用）。
 import type { CollectionEntry } from 'astro:content';
+import { assetUrl } from '../lib/assetUrl';
 
 interface Props {
   work: CollectionEntry<'works'>;
@@ -16,10 +17,10 @@ const year = date.getFullYear();
 <a
   class={`work-card${large ? ' work-card--large' : ''}`}
   data-cat={category}
-  href={`/works-presentation/works/${work.id}/`}
+  href={`${import.meta.env.BASE_URL}works/${work.id}/`}
 >
   <div class="thumb">
-    <img src={cover} alt={title} loading="lazy" />
+    <img src={assetUrl(cover)} alt={title} loading="lazy" />
   </div>
   <div class="meta">
     <span class="title">{title}</span>
