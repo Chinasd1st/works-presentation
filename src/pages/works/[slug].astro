@@ -67,54 +67,6 @@ const dateLabel = date.toLocaleDateString('en-US', {
 </Layout>
 
 <script>
-  // Pixelate (crystal) entrance: a canvas shows the image as coarse blocks
-  // (nearest-neighbour sampling) that refine to full detail, then fades out.
-  // 晶格化入场：canvas 以近邻采样显示粗块马赛克，逐帧细化到正常后移除。
-  function pixelReveal(img: HTMLImageElement) {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (img.dataset.px) return;
-    const start = () => {
-      img.dataset.px = '1';
-      const w = img.naturalWidth;
-      const h = img.naturalHeight;
-      if (!w || !h) return;
-
-      const canvas = document.createElement('canvas');
-      canvas.className = 'px-canvas';
-      canvas.setAttribute('aria-hidden', 'true');
-      const host = img.closest('.cover') ?? img.parentElement;
-      if (host) {
-        (host as HTMLElement).style.position = 'relative';
-        host.appendChild(canvas);
-      }
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      const DURATION = 750;
-      const MAX_BLOCK = 48;
-      const t0 = performance.now();
-
-      const frame = (now: number) => {
-        const t = Math.min((now - t0) / DURATION, 1);
-        const eased = 1 - Math.pow(1 - t, 3);
-        const block = Math.max(1, Math.round(MAX_BLOCK * (1 - eased)));
-        canvas.width = Math.max(1, Math.round(w / block));
-        canvas.height = Math.max(1, Math.round(h / block));
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        if (t < 1) {
-          requestAnimationFrame(frame);
-        } else {
-          canvas.remove();
-        }
-      };
-      requestAnimationFrame(frame);
-    };
-
-    if (img.complete && img.naturalWidth > 0) start();
-    else img.addEventListener('load', start, { once: true });
-  }
-
   // Lightbox for body images — click to view fullscreen, click or Esc to close.
   // 正文图片灯箱：点击全屏查看，点击/Esc 关闭。
   function initLightbox() {
@@ -146,18 +98,8 @@ const dateLabel = date.toLocaleDateString('en-US', {
     });
   }
 
-  function initReveals() {
-    document.querySelectorAll<HTMLImageElement>('.cover img, .work-body img').forEach((img) => {
-      pixelReveal(img);
-    });
-  }
-
   initLightbox();
-  initReveals();
-  document.addEventListener('astro:page-load', () => {
-    initLightbox();
-    initReveals();
-  });
+  document.addEventListener('astro:page-load', initLightbox);
 </script>
 
 <style>
@@ -308,16 +250,6 @@ const dateLabel = date.toLocaleDateString('en-US', {
     max-height: 92vh;
     object-fit: contain;
     border: none;
-  }
-
-  /* Pixel-reveal canvas overlaying the image (created at runtime) */
-
-  :global(.px-canvas) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
   }
 
   @keyframes lightbox-fade {

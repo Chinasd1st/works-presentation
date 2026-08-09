@@ -41,24 +41,24 @@
 }
 
 [data-theme='dark'] {
-  --bg: #0a0a0a;
-  --bg-muted: #141414;
+  --bg: #000000;
+  --bg-muted: #121212;
   --fg: #ededed;
   --fg-secondary: #9c9c9c;
   --fg-faint: #6b6b6b;
-  --line: #262626;
+  --line: #1f1f1f;
   --line-strong: #ededed;
 }
 
 @media (prefers-color-scheme: dark) {
   /* default follows system; inline script sets data-theme before paint */
   :root:not([data-theme]) {
-    --bg: #0a0a0a;
-    --bg-muted: #141414;
+    --bg: #000000;
+    --bg-muted: #121212;
     --fg: #ededed;
     --fg-secondary: #9c9c9c;
     --fg-faint: #6b6b6b;
-    --line: #262626;
+    --line: #1f1f1f;
     --line-strong: #ededed;
   }
 }
