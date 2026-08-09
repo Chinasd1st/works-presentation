@@ -1,8 +1,18 @@
 ---
-// About page — placeholder bio. Edit the copy below.
-// 关于页 —— 占位简介，编辑下方文案。
+// About page — bio + contact links.
+// 关于页 —— 简介 + 联系方式。
 import Layout from '../layouts/Layout.astro';
 import { siteConfig } from '../site.config';
+
+const links = [
+  { label: 'Blog', name: 'silentnrtx.top', href: 'https://silentnrtx.top' },
+  {
+    label: 'Bilibili',
+    name: 'bilibili.com',
+    href: 'https://space.bilibili.com/?spm_id_from=333.1007.0.0',
+  },
+  { label: 'GitHub', name: 'chinasd1st', href: 'https://github.com/chinasd1st' },
+];
 ---
 
 <Layout title="About" description="About the artist — 关于">
@@ -11,18 +21,24 @@ import { siteConfig } from '../site.config';
       <p class="eyebrow">About</p>
       <h1 class="h1">{siteConfig.title}</h1>
 
-      <!-- PLACEHOLDER: replace the bio below with real text -->
       <div class="stack bio">
         <p>
-          [PLACEHOLDER] Photographer and designer based in China. Working across landscape, urban
-          and portrait photography, and visual identity design.
-        </p>
-        <p>[占位文案] 摄影师与设计师。作品涵盖风景、城市与人像摄影，以及视觉识别设计。</p>
-        <p class="muted">
-          For commissions and collaborations, contact:
-          <a class="mail" href="mailto:hello@example.com">hello@example.com</a>
+          Photographer and designer based in China. Working across landscape, urban and portrait
+          photography, and visual identity design.
         </p>
       </div>
+
+      <h2 class="contact-head">Contact</h2>
+      <ul class="links">
+        {links.map((link) => (
+          <li>
+            <span class="link-label">{link.label}</span>
+            <a class="link-value" href={link.href} target="_blank" rel="noopener noreferrer">
+              {link.name}
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 </Layout>
@@ -39,12 +55,44 @@ import { siteConfig } from '../site.config';
     text-wrap: pretty;
   }
 
-  .mail {
-    color: var(--fg);
-    border-bottom: 1px solid var(--line-strong);
+  .contact-head {
+    margin-top: var(--space-8);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--fg-faint);
   }
 
-  .mail:hover {
+  .links {
+    list-style: none;
+    margin: var(--space-5) 0 0;
+    padding: 0;
+  }
+
+  .links li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    padding-block: var(--space-2);
+  }
+
+  .link-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-faint);
+    min-width: 72px;
+  }
+
+  .link-value {
+    font-size: 17px;
+    border-bottom: 1px solid transparent;
+    transition:
+      color var(--dur-fast) var(--ease),
+      border-color var(--dur-fast) var(--ease);
+  }
+
+  .link-value:hover {
     color: var(--fg-secondary);
     border-color: var(--fg-secondary);
   }
