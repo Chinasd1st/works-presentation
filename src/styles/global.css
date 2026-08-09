@@ -31,7 +31,7 @@
   --space-10: 128px;
 
   /* Layout */
-  --container: 1200px;
+  --container: 1800px;
   --radius: 2px;
 
   /* Motion — short, restrained */
@@ -85,9 +85,18 @@ body {
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  transition:
-    background-color var(--dur) var(--ease),
-    color var(--dur) var(--ease);
+  transition: background-color var(--dur) var(--ease);
+
+  /* Fixed left sidebar + fluid content column.
+     固定左侧栏 + 自适应内容列。 */
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+
+@media (max-width: 900px) {
+  body {
+    grid-template-columns: 1fr;
+  }
 }
 
 ::selection {
@@ -109,7 +118,7 @@ img {
 
 .display {
   /* reference site hero: ~19vw, 251.6px @ 1324px viewport */
-  font-size: clamp(56px, 19vw, 252px);
+  font-size: clamp(56px, 17vw, 320px);
   font-weight: 500;
   /* reference: line-height ~0.8× for the hero letters */
   line-height: 0.8;
@@ -158,7 +167,9 @@ h3,
   width: 100%;
   max-width: var(--container);
   margin-inline: auto;
-  padding-inline: var(--space-5);
+  /* Near full-bleed: generous edge padding instead of a narrow column.
+     近乎全宽：用大边距代替窄栏。 */
+  padding-inline: clamp(20px, 4vw, 64px);
 }
 
 .section {
