@@ -239,3 +239,66 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     }
   }
 </style>
+
+<script>
+  // True masonry for work grids: CSS Grid rows stretch to the tallest item
+  // in the row, leaving gaps under shorter cards. Instead, place every card
+  // absolutely into the currently shortest column so each column flows
+  // continuously (Pinterest-style), preserving reading order.
+  // 真 masonry：grid 行高取同排最高项会令矮卡片下方留白；
+  // 改为每张卡片绝对定位到当前最短列，列内连续排布且保持顺序。
+  (() => {
+    if (document.documentElement.dataset.masonry) return;
+    document.documentElement.dataset.masonry = '1';
+
+    const COL_GAP = 24; // var(--space-6)
+    const ROW_GAP = 48; // var(--space-7)
+    const singleCol = () => window.matchMedia('(max-width: 720px)').matches;
+
+    const layoutGrid = (grid: HTMLElement) => {
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>('.work-card'));
+      if (!cards.length) return;
+
+      if (singleCol()) {
+        cards.forEach((c) => {
+          c.style.position = '';
+          c.style.left = '';
+          c.style.top = '';
+          c.style.width = '';
+        });
+        grid.style.height = '';
+        return;
+      }
+
+      grid.style.position = 'relative';
+      const colWidth = (grid.clientWidth - COL_GAP) / 2;
+      const heights = [0, 0];
+      cards.forEach((card) => {
+        const col = heights[0] <= heights[1] ? 0 : 1;
+        card.style.position = 'absolute';
+        card.style.width = `${colWidth}px`;
+        card.style.left = col === 0 ? '0px' : `${colWidth + COL_GAP}px`;
+        card.style.top = `${heights[col]}px`;
+        heights[col] += card.offsetHeight + ROW_GAP;
+      });
+      grid.style.height = `${Math.max(heights[0], heights[1]) - ROW_GAP}px`;
+    };
+
+    const relayout = () => {
+      document.querySelectorAll<HTMLElement>('.grid').forEach(layoutGrid);
+    };
+
+    // Lazy images change card heights once loaded.
+    document.addEventListener(
+      'load',
+      (e) => {
+        if (e.target instanceof HTMLImageElement) relayout();
+      },
+      true,
+    );
+    window.addEventListener('resize', relayout);
+    document.addEventListener('astro:page-load', () => requestAnimationFrame(relayout));
+    // Exposed so filters etc. can trigger a reflow. 供分类筛选等触发重排。
+    (window as unknown as { relayoutGrids: () => void }).relayoutGrids = relayout;
+  })();
+</script>

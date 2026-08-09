@@ -46,6 +46,8 @@ const categories = ['all', ...new Set(works.map((w) => w.data.category))];
         const category = card.querySelector('.info')?.textContent?.split(' ')[0];
         card.style.display = filter === 'all' || category === filter ? '' : 'none';
       });
+      // Re-run masonry after filtering. 筛选后重排 masonry。
+      (window as unknown as { relayoutGrids?: () => void }).relayoutGrids?.();
     });
   });
 </script>

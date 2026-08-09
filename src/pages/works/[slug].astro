@@ -68,8 +68,7 @@ const dateLabel = date.toLocaleDateString('en-US', {
 
 <script>
   // Lightbox for body images — click to view fullscreen, click or Esc to close.
-  // A circular zoom lens follows the pointer over the image.
-  // 正文图片灯箱：点击全屏查看，点击/Esc 关闭；圆形放大镜跟随鼠标。
+  // 正文图片灯箱：点击全屏查看，点击/Esc 关闭。
   function initLightbox() {
     document.querySelectorAll<HTMLImageElement>('.work-body img').forEach((img) => {
       if (img.dataset.lightbox) return;
@@ -82,39 +81,9 @@ const dateLabel = date.toLocaleDateString('en-US', {
         full.src = img.src;
         full.alt = img.alt;
         overlay.appendChild(full);
-
-        // Zoom lens: magnified view following the pointer.
-        // 放大镜：2x 放大视图，跟随鼠标，离开图片区域隐藏。
-        const ZOOM = 2;
-        const SIZE = 200;
-        const lens = document.createElement('div');
-        lens.className = 'zoom-lens';
-        const lensImg = document.createElement('img');
-        lensImg.alt = '';
-        lensImg.draggable = false;
-        lens.appendChild(lensImg);
-        overlay.appendChild(lens);
         document.body.appendChild(overlay);
         document.body.classList.add('lightbox-open');
         document.body.style.overflow = 'hidden';
-
-        const updateLens = (e: MouseEvent) => {
-          const r = full.getBoundingClientRect();
-          const x = e.clientX - r.left;
-          const y = e.clientY - r.top;
-          const inside = x >= 0 && y >= 0 && x <= r.width && y <= r.height;
-          if (!inside || r.width === 0 || r.height === 0) {
-            lens.classList.remove('on');
-            return;
-          }
-          lens.classList.add('on');
-          lensImg.style.width = `${r.width * ZOOM}px`;
-          lensImg.style.height = `${r.height * ZOOM}px`;
-          lensImg.style.transform = `translate(${-x * ZOOM + SIZE / 2}px, ${-y * ZOOM + SIZE / 2}px)`;
-          lens.style.left = `${e.clientX - SIZE / 2}px`;
-          lens.style.top = `${e.clientY - SIZE / 2}px`;
-        };
-        overlay.addEventListener('mousemove', updateLens);
 
         const close = () => {
           overlay.remove();
@@ -283,59 +252,6 @@ const dateLabel = date.toLocaleDateString('en-US', {
     max-height: 92vh;
     object-fit: contain;
     border: none;
-  }
-
-  /* Zoom lens (created at runtime) — circular magnifier over the pointer */
-  :global(.zoom-lens) {
-    position: fixed;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    border: 3px solid var(--fg);
-    background: var(--bg);
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 110;
-    opacity: 0;
-    transition: opacity var(--dur-fast) var(--ease);
-  }
-
-  :global(.zoom-lens.on) {
-    opacity: 1;
-  }
-
-  :global(.zoom-lens img) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    max-width: none;
-    display: block;
-    will-change: transform;
-  }
-
-  /* Crosshair center, accent colored — 中心十字准星（accent 色） */
-  :global(.zoom-lens)::before,
-  :global(.zoom-lens)::after {
-    content: '';
-    position: absolute;
-    background: var(--accent);
-    z-index: 1;
-  }
-
-  :global(.zoom-lens)::before {
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 1.5px;
-    transform: translateY(-0.75px);
-  }
-
-  :global(.zoom-lens)::after {
-    left: 50%;
-    top: 0;
-    height: 100%;
-    width: 1.5px;
-    transform: translateX(-0.75px);
   }
 
   @keyframes lightbox-fade {
