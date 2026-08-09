@@ -4,8 +4,9 @@
 import '@fontsource-variable/geist';
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
-import { siBilibili, siGithub, siRss } from 'simple-icons';
+import { siBilibili, siGithub, siOsu, siRss } from 'simple-icons';
 import { siteConfig } from '../site.config';
+import Cursor from '../components/Cursor.astro';
 
 // Brand icons (simple-icons) per social label. Official brand marks:
 // Bilibili and GitHub have real icons here, unlike Lucide.
@@ -13,6 +14,7 @@ const socialIcons: Record<string, string> = {
   Blog: siRss.path,
   Bilibili: siBilibili.path,
   GitHub: siGithub.path,
+  Osu: siOsu.path,
 };
 
 interface Props {
@@ -122,6 +124,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         </div>
       </footer>
     </div>
+
+    <Cursor />
   </body>
 </html>
 
@@ -158,14 +162,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--fg-secondary);
+    /* Pure foreground (black in light theme, #ededed in dark) — 纯前景色 */
+    color: var(--fg);
     transition:
-      color var(--dur-fast) var(--ease),
+      opacity var(--dur-fast) var(--ease),
       letter-spacing var(--dur-fast) var(--ease);
   }
 
   .nav a:hover {
-    color: var(--fg);
+    opacity: 0.6;
     letter-spacing: 0.16em;
   }
 

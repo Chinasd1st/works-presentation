@@ -3,6 +3,7 @@
 // 首页 —— 巨幅标题 + 精选作品 + 最新作品。
 import Layout from '../layouts/Layout.astro';
 import WorkCard from '../components/WorkCard.astro';
+import MarqueeStrip from '../components/MarqueeStrip.astro';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../site.config';
 
@@ -23,7 +24,6 @@ const heroLetters = siteConfig.title
 <Layout>
   <section class="hero">
     <div class="container">
-      <p class="eyebrow">Portfolio — {new Date().getFullYear()}</p>
       <h1 class="display hero-title" aria-label={siteConfig.title.toUpperCase()}>
         {
           heroLetters.map(({ ch, space }) =>
@@ -43,7 +43,11 @@ const heroLetters = siteConfig.title
 
   <section class="section description">
     <div class="container">
-      <p class="eyebrow">About</p>
+      <!-- Same structure as the other section titles (Selected Works, Latest) -->
+      <div class="section-head">
+        <h2>About</h2>
+        <span class="section-sym" aria-hidden="true"></span>
+      </div>
       <p class="description-text">
         Photographer and designer based in China — working across landscape, urban and portrait
         photography, visual identity design and print. Selected works and experiments live below.
@@ -55,11 +59,14 @@ const heroLetters = siteConfig.title
     </div>
   </section>
 
+  <MarqueeStrip />
+
   <section class="section">
     <div class="container">
       <div class="section-head">
         <h2>Selected Works</h2>
         <a class="seeall-link" href={`${import.meta.env.BASE_URL}works/`}>ALL →</a>
+        <span class="section-sym" aria-hidden="true"></span>
       </div>
       <div class="grid">
         {featured.map((work) => <WorkCard work={work} />)}
@@ -72,6 +79,7 @@ const heroLetters = siteConfig.title
       <div class="section-head">
         <h2>Latest</h2>
         <a class="seeall-link" href={`${import.meta.env.BASE_URL}works/`}>ALL →</a>
+        <span class="section-sym" aria-hidden="true"></span>
       </div>
       <div class="grid">
         {recent.map((work) => <WorkCard work={work} />)}
@@ -90,6 +98,7 @@ const heroLetters = siteConfig.title
 
 <style>
   .hero {
+    position: relative;
     padding-block: clamp(64px, 14vh, 160px) var(--space-9);
   }
 
@@ -142,6 +151,22 @@ const heroLetters = siteConfig.title
   .description-text.zh {
     max-width: 26ch;
     margin-top: var(--space-5);
+  }
+
+  /* Random + × symbol at the section title's top-right corner.
+     section 标题右上角的随机 + × 符号（accent 色小装饰）。 */
+  .section-head {
+    position: relative;
+  }
+
+  .section-sym {
+    position: absolute;
+    top: var(--space-4);
+    right: 0;
+    color: var(--accent);
+    font-size: clamp(22px, 2.6vw, 36px);
+    font-weight: 500;
+    line-height: 1;
   }
 
   .grid {
@@ -323,9 +348,20 @@ const heroLetters = siteConfig.title
     images.forEach((img) => io.observe(img));
   }
 
+  // Random + × symbol for each section title corner.
+  // 为每个 section 标题右上角填充随机符号（+、× 之一）。
+  function initSectionSyms() {
+    const syms = ['+', '×'];
+    document.querySelectorAll<HTMLElement>('.section-sym').forEach((el) => {
+      if (el.textContent) return;
+      el.textContent = syms[Math.floor(Math.random() * syms.length)];
+    });
+  }
+
   // Fires on initial load AND after every navigation (no direct call needed).
   document.addEventListener('astro:page-load', () => {
     heroTypo();
     initReveals();
+    initSectionSyms();
   });
 </script>

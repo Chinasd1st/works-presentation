@@ -1,0 +1,259 @@
+﻿---
+// Custom crosshair cursor: four corner brackets that, near a link,
+// smoothly trace/lock onto the link's own corners (aiming-box effect).
+// 自定义瞄准镜光标：四角括号；靠近超链接时四角平滑吸附并框选链接四角。
+// Global via Layout.
+---
+
+<div class="cursor-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<div class="cursor-cross" aria-hidden="true"><i class="cx-h"></i><i class="cx-v"></i></div>
+
+<script>
+  (() => {
+    if (document.documentElement.dataset.cursor) return;
+    document.documentElement.dataset.cursor = '1';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    // Resting size of the crosshair (centered on the pointer).
+    const REST = 28;
+    const SNAP_RADIUS = 48;
+    const PAD = 6;
+
+    // Start off-screen so nothing flashes at the top-left corner before
+    // the first mousemove. 初始置于屏幕外，避免首帧停留在左上角。
+    let mx = -100;
+    let my = -100;
+    let fx = -100;
+    let fy = -100;
+    let fw = REST;
+    let fh = REST;
+    let shown = false;
+    let active = false;
+
+    const refreshLinks = () =>
+      Array.from(document.querySelectorAll('a')).filter((a) => {
+        const r = a.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
+    window.addEventListener('resize', refreshLinks);
+    window.addEventListener('scroll', refreshLinks, { passive: true });
+
+    document.addEventListener('mousemove', (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+      shown = true;
+    });
+
+    const distToRect = (x: number, y: number, r: DOMRect) => {
+      const dx = Math.max(r.left - x, 0, x - r.right);
+      const dy = Math.max(r.top - y, 0, y - r.bottom);
+      return Math.hypot(dx, dy);
+    };
+
+    const frame = () => {
+      // Query the live elements every frame so the cursor survives
+      // View Transitions DOM swaps.
+      // 每帧查询最新 DOM 元素，View Transitions 替换后依然可用。
+      const corners = document.querySelector<HTMLElement>('.cursor-corners');
+      const cross = document.querySelector<HTMLElement>('.cursor-cross');
+      if (corners && cross) {
+        let snapRect: DOMRect | null = null;
+        let best = SNAP_RADIUS;
+        for (const a of refreshLinks()) {
+          const r = a.getBoundingClientRect();
+          const d = distToRect(mx, my, r);
+          if (d < best) {
+            best = d;
+            snapRect = r;
+          }
+        }
+
+        if (snapRect) {
+          // Trace the link's corners (with a little breathing room).
+          // 四角吸附：框选链接的四角（带一点余量）。
+          const tx = snapRect.left - PAD;
+          const ty = snapRect.top - PAD;
+          const tw = snapRect.width + PAD * 2;
+          const th = snapRect.height + PAD * 2;
+          fx += (tx - fx) * 0.16;
+          fy += (ty - fy) * 0.16;
+          fw += (tw - fw) * 0.16;
+          fh += (th - fh) * 0.16;
+          if (!active) {
+            active = true;
+            corners.classList.add('snap');
+          }
+        } else {
+          fx += (mx - REST / 2 - fx) * 0.22;
+          fy += (my - REST / 2 - fy) * 0.22;
+          fw += (REST - fw) * 0.22;
+          fh += (REST - fh) * 0.22;
+          if (active) {
+            active = false;
+            corners.classList.remove('snap');
+          }
+        }
+
+        corners.style.left = `${fx}px`;
+        corners.style.top = `${fy}px`;
+        corners.style.width = `${fw}px`;
+        corners.style.height = `${fh}px`;
+        corners.classList.toggle('visible', shown);
+        // Crosshair center follows the pointer exactly (tool-like precision).
+        // 中心十字精确跟随鼠标（工具感定位）。
+        cross.style.transform = `translate(${mx - 9}px, ${my - 9}px)`;
+        cross.classList.toggle('visible', shown);
+        cross.classList.toggle('snap', active);
+      }
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  })();
+</script>
+
+<style>
+  /* body/a live outside the component, so :global() is required */
+  :global(body),
+  :global(a) {
+    cursor: none;
+  }
+
+  .cursor-corners {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 28px;
+    height: 28px;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition:
+      opacity var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease);
+    color: var(--fg);
+  }
+
+  .cursor-corners.visible {
+    opacity: 1;
+  }
+
+  .cursor-corners.snap {
+    color: var(--accent);
+  }
+
+  /* Four corner brackets (L-shapes). 四角括号（L 形） */
+  .cursor-corners i {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 0 solid currentColor;
+    transition: border-color var(--dur-fast) var(--ease);
+  }
+
+  .cursor-corners i:nth-child(1) {
+    top: 0;
+    left: 0;
+    border-top-width: 3px;
+    border-left-width: 3px;
+  }
+
+  .cursor-corners i:nth-child(2) {
+    top: 0;
+    right: 0;
+    border-top-width: 3px;
+    border-right-width: 3px;
+  }
+
+  .cursor-corners i:nth-child(3) {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+  }
+
+  .cursor-corners i:nth-child(4) {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 3px;
+    border-right-width: 3px;
+  }
+
+  /* Fine crosshair at the pointer, same weight as the brackets.
+     中心十字：与角标同粗细（3px），精确跟随。 */
+  .cursor-cross {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    color: var(--fg);
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition:
+      opacity var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease);
+  }
+
+  .cursor-cross.visible {
+    opacity: 1;
+  }
+
+  .cursor-cross.snap {
+    color: var(--accent);
+  }
+
+  .cursor-cross i {
+    position: absolute;
+    background: currentColor;
+  }
+
+  .cursor-cross .cx-h {
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    transform: translateY(-1.5px);
+  }
+
+  .cursor-cross .cx-v {
+    top: 0;
+    left: 50%;
+    width: 3px;
+    height: 100%;
+    transform: translateX(-1.5px);
+  }
+
+  /* Touch devices: keep the native cursor. 触屏设备保留系统光标 */
+  @media (hover: none) {
+    :global(body),
+    :global(a) {
+      cursor: auto;
+    }
+
+    .cursor-corners,
+    .cursor-cross {
+      display: none;
+    }
+  }
+
+  /* Reduced motion: fall back to the system cursor. 减少动效：用系统光标 */
+  @media (prefers-reduced-motion: reduce) {
+    :global(body),
+    :global(a) {
+      cursor: auto;
+    }
+
+    .cursor-corners,
+    .cursor-cross {
+      display: none;
+    }
+  }
+
+  /* Lightbox open: the zoom lens takes over the pointer.
+     灯箱打开时由放大镜接管，隐藏自定义光标。 */
+  :global(body.lightbox-open) .cursor-corners,
+  :global(body.lightbox-open) .cursor-cross {
+    display: none;
+  }
+</style>

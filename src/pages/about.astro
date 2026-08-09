@@ -12,6 +12,7 @@ const links = [
     href: 'https://space.bilibili.com/?spm_id_from=333.1007.0.0',
   },
   { label: 'GitHub', name: 'chinasd1st', href: 'https://github.com/chinasd1st' },
+  { label: 'Osu', name: 'osu!', href: 'https://osu.ppy.sh/users/34040390' },
 ];
 ---
 
@@ -19,7 +20,9 @@ const links = [
   <section class="section">
     <div class="container narrow">
       <p class="eyebrow">About</p>
-      <h1 class="h1">{siteConfig.title}</h1>
+      <!-- .h2 keeps the visual weight consistent with section titles
+           like "Selected Works" on the homepage. -->
+      <h1 class="h2">{siteConfig.title}</h1>
 
       <div class="stack bio">
         <p>

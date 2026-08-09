@@ -1,0 +1,126 @@
+---
+// Decorative inverted marquee strip (homepage only): photos run right to
+// left in a seamless loop, title overlaid on the right (cover-style).
+// 装饰性反色跑马灯条（仅首页）：图片自右向左无缝滚动，
+// 标题居右叠加（仿 cover 头图）。
+import { siteConfig } from '../site.config';
+
+// Two identical copies make the -50% translate loop seamless.
+// 两份相同序列保证 -50% 平移无缝循环。
+const stripImages = [
+  'works/guangzhou-scenery/DSC09663.jpg',
+  'works/guangzhou-scenery/DSC09565.jpg',
+  'works/guangzhou-scenery/DSC09570.jpg',
+  'works/guangzhou-scenery/cover.jpg',
+  'works/math-gazette-issue-2/cover.jpg',
+  'works/math-gazette-issue-2/back.jpg',
+].map((p) => `${import.meta.env.BASE_URL}${p}`);
+---
+
+<section class="section strip-section" aria-label="Gallery">
+  <div class="strip-stage">
+    <div class="strip-track">
+      {[...stripImages, ...stripImages].map((src) => (
+        <img class="strip-img" src={src} alt="" loading="lazy" draggable="false" />
+      ))}
+    </div>
+    <div class="strip-head">
+      <h2 class="strip-title">{siteConfig.title.toUpperCase()}</h2>
+    </div>
+  </div>
+</section>
+
+<style>
+  .strip-section {
+    background: var(--invert-bg);
+    color: var(--invert-fg);
+    padding-block: 0;
+  }
+
+  .strip-stage {
+    position: relative;
+    overflow: hidden;
+    height: clamp(180px, 22vw, 300px);
+  }
+
+  .strip-track {
+    display: flex;
+    width: max-content;
+    height: 100%;
+    animation: marquee 45s linear infinite;
+  }
+
+  /* Fixed width + object-fit: cover crops to a uniform ratio;
+     no margin between images so no background gap shows through.
+     Monochrome filter keeps the strip quiet and on-system.
+     固定宽度 + cover 裁切统一比例；图片紧贴无间距；
+     单色滤镜降低视觉噪声，保持整体黑白语言。 */
+  .strip-img {
+    height: 100%;
+    width: 320px;
+    object-fit: cover;
+    filter: grayscale(1);
+    user-select: none;
+    display: block;
+  }
+
+  /* Theme-colored scrim, like the work detail cover header.
+     Always dark, regardless of theme, for consistent contrast.
+     遮罩恒为深色（不随主题反色），保证对比一致。 */
+  .strip-stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.45);
+    pointer-events: none;
+  }
+
+  .strip-head {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+    padding-right: clamp(20px, 4vw, 48px);
+  }
+
+  .strip-title {
+    font-size: clamp(20px, 3vw, 40px);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    /* Fixed white, matches the scrim — 固定白色标题 */
+    color: #ffffff;
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .strip-track {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .strip-stage {
+      height: 140px;
+    }
+
+    .strip-img {
+      width: 220px;
+    }
+  }
+</style>

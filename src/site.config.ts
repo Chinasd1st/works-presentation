@@ -25,5 +25,6 @@ export const siteConfig = {
     { label: 'Blog', href: 'https://silentnrtx.top' },
     { label: 'Bilibili', href: 'https://space.bilibili.com/?spm_id_from=333.1007.0.0' },
     { label: 'GitHub', href: 'https://github.com/chinasd1st' },
+    { label: 'Osu', href: 'https://osu.ppy.sh/users/34040390' },
   ],
 } as const;
