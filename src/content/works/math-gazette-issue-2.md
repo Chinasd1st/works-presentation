@@ -12,5 +12,5 @@ description: "Tonggao Math Gazette Issue 2 — cover & back cover design"
 
 Cover and back cover design for Issue 2 of the Tonggao Math Gazette. A4 portrait, laid out in InDesign, exported to PDF for print.
 
+![Cover 封面](/works-presentation/works/math-gazette-issue-2/cover.jpg)
 ![Back cover 封底](/works-presentation/works/math-gazette-issue-2/back.jpg)
-*Back cover 封底*
