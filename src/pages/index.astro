@@ -212,41 +212,78 @@ const heroLetters = siteConfig.title
     });
   }
 
-  // Pixelate (crystal) entrance for work card thumbnails: a canvas renders
-  // the image as coarse blocks (nearest-neighbour sampling) that refine to
-  // full detail as the card scrolls into view, then fades out.
-  // 作品卡片晶格化入场：canvas 以近邻采样显示粗块马赛克，进入视口后逐帧细化。
+  // Pixelate entrance for work card thumbnails, modelled after
+  // hoshimiyatoto.com: grey placeholder block -> fast fine-to-coarse
+  // mosaic flash (~150ms) -> canvas disappears to reveal the sharp image.
+  // 作品卡片晶格化入场（参考 hoshimiyatoto.com）：灰块占位 → 细→粗马赛克
+  // 快速闪烁（约 150ms）→ canvas 消失露出清晰原图。
   function pixelReveal(img: HTMLImageElement) {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (img.dataset.px) return;
-    const start = () => {
-      img.dataset.px = '1';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    img.dataset.px = '1';
+    const thumb = img.closest<HTMLElement>('.thumb');
+    if (!thumb) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'px-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    // Solid grey placeholder while the image loads
+    // 图片加载期间的纯灰占位块
+    canvas.style.backgroundColor = 'var(--bg-muted)';
+    thumb.style.position = 'relative';
+    thumb.appendChild(canvas);
+
+    const animate = () => {
       const w = img.naturalWidth;
       const h = img.naturalHeight;
-      if (!w || !h) return;
-      const thumb = img.closest<HTMLElement>('.thumb');
-      if (!thumb) return;
-      const canvas = document.createElement('canvas');
-      canvas.className = 'px-canvas';
-      canvas.setAttribute('aria-hidden', 'true');
-      thumb.style.position = 'relative';
-      thumb.appendChild(canvas);
-
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      const DURATION = 750;
-      const MAX_BLOCK = 48;
+      if (!w || !h || !ctx) {
+        canvas.remove();
+        return;
+      }
+      // Downscale to a small offscreen canvas, then nearest-neighbour
+      // upscale per frame — cheap and truly blocky.
+      // 降采样到离屏小画布，每帧最近邻放大——成本低且块感真实。
+      const MAX_EDGE = 640;
+      const s = Math.min(1, MAX_EDGE / Math.max(w, h));
+      const ow = Math.max(1, Math.round(w * s));
+      const oh = Math.max(1, Math.round(h * s));
+      const off = document.createElement('canvas');
+      off.width = ow;
+      off.height = oh;
+      const octx = off.getContext('2d');
+      if (!octx) {
+        canvas.remove();
+        return;
+      }
+      octx.imageSmoothingEnabled = false;
+      octx.drawImage(img, 0, 0, ow, oh);
+
+      // Fine-to-coarse blocks, quick flash (total ~152ms, like the reference)
+      // 由细到粗的块级递进，快速闪过（总时长约 152ms，与参考站一致）
+      const steps = [3, 6, 12, 24, 48];
+      const stepMs = [56, 40, 28, 18, 10];
+      const total = stepMs.reduce((a, b) => a + b, 0);
       const t0 = performance.now();
 
       const frame = (now: number) => {
-        const t = Math.min((now - t0) / DURATION, 1);
-        const eased = 1 - Math.pow(1 - t, 3);
-        const block = Math.max(1, Math.round(MAX_BLOCK * (1 - eased)));
-        canvas.width = Math.max(1, Math.round(w / block));
-        canvas.height = Math.max(1, Math.round(h / block));
+        const elapsed = now - t0;
+        let acc = 0;
+        let idx = 0;
+        for (let k = 0; k < steps.length; k++) {
+          acc += stepMs[k];
+          if (elapsed < acc) {
+            idx = k;
+            break;
+          }
+          idx = k;
+        }
+        const block = steps[idx];
+        canvas.width = Math.max(1, Math.round(ow / block));
+        canvas.height = Math.max(1, Math.round(oh / block));
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        if (t < 1) {
+        ctx.drawImage(off, 0, 0, canvas.width, canvas.height);
+        if (elapsed < total) {
           requestAnimationFrame(frame);
         } else {
           canvas.remove();
@@ -255,8 +292,17 @@ const heroLetters = siteConfig.title
       requestAnimationFrame(frame);
     };
 
-    if (img.complete && img.naturalWidth > 0) start();
-    else img.addEventListener('load', start, { once: true });
+    if (img.complete && img.naturalWidth > 0) {
+      img.decode().then(animate).catch(animate);
+    } else {
+      img.addEventListener(
+        'load',
+        () => {
+          img.decode().then(animate).catch(animate);
+        },
+        { once: true },
+      );
+    }
   }
 
   function initReveals() {
@@ -270,7 +316,7 @@ const heroLetters = siteConfig.title
           }
         });
       },
-      { rootMargin: '160px' },
+      { rootMargin: '0px' },
     );
     images.forEach((img) => io.observe(img));
   }
