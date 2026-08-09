@@ -82,6 +82,7 @@ body {
   color: var(--fg);
   font-family: var(--font-sans);
   font-size: 16px;
+  font-weight: 500;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -108,11 +109,12 @@ img {
 /* ---------- Type scale (oversized contrast, hoshimiyatoto-style) ---------- */
 
 .display {
-  /* hoshimiyatoto.com hero: ~19vw, 251.6px @ 1324px viewport */
+  /* reference site hero: ~19vw, 251.6px @ 1324px viewport */
   font-size: clamp(56px, 19vw, 252px);
   font-weight: 500;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
+  /* reference: line-height ~0.8× for the hero letters */
+  line-height: 0.8;
+  letter-spacing: normal;
   margin: 0;
   text-wrap: pretty;
 }
@@ -132,7 +134,7 @@ h2,
   font-size: clamp(28px, 4.5vw, 48px);
   font-weight: 500;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: normal;
   margin: 0;
 }
 
@@ -168,10 +170,6 @@ h3,
 }
 
 .section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
   margin-bottom: var(--space-7);
   border-top: 1px solid var(--line);
   padding-top: var(--space-4);
@@ -179,37 +177,20 @@ h3,
 
 /* ---------- Links & buttons ---------- */
 
-.arrow-link {
-  font-family: var(--font-mono);
-  font-size: 13px;
+.seeall-link {
+  font-size: 12px;
+  letter-spacing: normal;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding-block: var(--space-1);
-  position: relative;
-}
-
-.arrow-link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 1px;
-  width: 100%;
-  background: currentColor;
-  transform-origin: right;
-  transition: transform var(--dur) var(--ease);
-}
-
-.arrow-link:hover::after {
-  transform: scaleX(0.35);
-  transform-origin: left;
-}
-
-.arrow-link:hover {
   color: var(--fg-secondary);
+  display: inline-block;
+  padding-block: var(--space-1);
+  transition: opacity var(--dur-fast) var(--ease);
+  border: none;
+  background: none;
+}
+
+.seeall-link:hover {
+  opacity: 0.6;
 }
 
 /* ---------- Work card ---------- */
