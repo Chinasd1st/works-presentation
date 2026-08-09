@@ -33,19 +33,19 @@ const dateLabel = date.toLocaleDateString('en-US', {
 <Layout title={title} description={description}>
   <article class="section work-detail">
     <div class="container">
-      <div class="work-head">
-        <p class="eyebrow">
-          {category}{location ? ` / ${location}` : ''} · {year}
-        </p>
-        <h1 class="h1 work-title">{title}</h1>
-        <p class="work-date faint">{dateLabel}</p>
-      </div>
-
       <figure class="cover">
         <img src={assetUrl(cover)} alt={title} />
+        <figcaption class="work-head">
+          <p class="eyebrow">
+            {category}{location ? ` / ${location}` : ''} · {year}
+          </p>
+          <h1 class="h1 work-title">{title}</h1>
+          <p class="work-date faint">{dateLabel}</p>
+        </figcaption>
       </figure>
 
       <div class="work-body stack">
+        <h2 class="work-section-title">About this work</h2>
         <Content />
       </div>
 
@@ -66,13 +66,54 @@ const dateLabel = date.toLocaleDateString('en-US', {
   </article>
 </Layout>
 
+<script>
+  // Lightbox for body images — click to view fullscreen, click or Esc to close.
+  // 正文图片灯箱：点击全屏查看，点击/Esc 关闭。
+  function initLightbox() {
+    document.querySelectorAll<HTMLImageElement>('.work-body img').forEach((img) => {
+      if (img.dataset.lightbox) return;
+      img.dataset.lightbox = 'true';
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', () => {
+        const overlay = document.createElement('div');
+        overlay.className = 'lightbox';
+        const full = document.createElement('img');
+        full.src = img.src;
+        full.alt = img.alt;
+        overlay.appendChild(full);
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+
+        const close = () => {
+          overlay.remove();
+          document.body.style.overflow = '';
+          document.removeEventListener('keydown', onKey);
+        };
+        const onKey = (e: KeyboardEvent) => {
+          if (e.key === 'Escape') close();
+        };
+        overlay.addEventListener('click', close);
+        document.addEventListener('keydown', onKey);
+      });
+    });
+  }
+
+  initLightbox();
+  document.addEventListener('astro:page-load', initLightbox);
+</script>
+
 <style>
   .work-detail {
     padding-top: var(--space-8);
   }
 
   .work-head {
-    margin-bottom: var(--space-7);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    padding: var(--space-5) var(--space-6);
   }
 
   .work-title {
@@ -81,25 +122,65 @@ const dateLabel = date.toLocaleDateString('en-US', {
 
   .work-date {
     margin: 0;
-    font-family: var(--font-mono);
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .cover {
+    position: relative;
     margin: 0 0 var(--space-8);
+    aspect-ratio: 3 / 1;
+    overflow: hidden;
+    background: var(--bg-muted);
   }
 
   .cover img {
     width: 100%;
-    border: 1px solid var(--line);
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  /* Theme-colored solid scrim: uniform tint that keeps the overlaid
+     title readable in both light and dark themes.
+     主题色纯色遮罩：均匀着色，保证标题在深浅主题下均可读。 */
+  .cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--bg) 60%, transparent);
+  }
+
+  /* Overlaid info uses pure foreground (black/white), no gray tones */
+  .cover .eyebrow,
+  .cover .work-date {
+    color: var(--fg);
+  }
+
+  @media (max-width: 650px) {
+    .cover {
+      aspect-ratio: 16 / 9;
+    }
   }
 
   .work-body {
     max-width: 68ch;
+    margin-inline: auto;
     color: var(--fg-secondary);
     font-size: 17px;
+  }
+
+  .work-section-title {
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-faint);
+    padding-top: var(--space-4);
+    margin-bottom: var(--space-5);
   }
 
   .work-body :global(h2) {
@@ -124,7 +205,8 @@ const dateLabel = date.toLocaleDateString('en-US', {
   }
 
   .work-body :global(img) {
-    border: 1px solid var(--line);
+    display: block;
+    margin: var(--space-6) auto;
   }
 
   .tags {
@@ -137,18 +219,46 @@ const dateLabel = date.toLocaleDateString('en-US', {
   }
 
   .tags li {
-    font-family: var(--font-mono);
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--fg-secondary);
-    border: 1px solid var(--line);
     padding: 2px var(--space-2);
   }
 
   .work-nav {
     margin-top: var(--space-9);
-    border-top: 1px solid var(--line);
     padding-top: var(--space-4);
+  }
+
+  /* Lightbox overlay (created at runtime, so styles must be :global) */
+
+  :global(.lightbox) {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.92);
+    cursor: zoom-out;
+    animation: lightbox-fade var(--dur) var(--ease);
+  }
+
+  :global(.lightbox img) {
+    max-width: 92vw;
+    max-height: 92vh;
+    object-fit: contain;
+    border: none;
+  }
+
+  @keyframes lightbox-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 </style>
