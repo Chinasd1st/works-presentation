@@ -259,9 +259,11 @@ const heroLetters = siteConfig.title
       octx.imageSmoothingEnabled = false;
       octx.drawImage(img, 0, 0, ow, oh);
 
-      // Fine-to-coarse blocks, quick flash (total ~152ms, like the reference)
-      // 由细到粗的块级递进，快速闪过（总时长约 152ms，与参考站一致）
-      const steps = [3, 6, 12, 24, 48];
+      // Coarse-to-fine blocks, quick flash (~152ms): starts as an obvious
+      // mosaic and resolves to near-clear before the canvas disappears.
+      // 由粗到细的块级递进，快速闪过（约 152ms）：首帧即明显马赛克，
+      // 结尾接近清晰后 canvas 消失露出原图。
+      const steps = [48, 24, 12, 6, 3];
       const stepMs = [56, 40, 28, 18, 10];
       const total = stepMs.reduce((a, b) => a + b, 0);
       const t0 = performance.now();
