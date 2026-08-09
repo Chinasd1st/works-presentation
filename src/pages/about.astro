@@ -1,0 +1,51 @@
+---
+// About page — placeholder bio. Edit the copy below.
+// 关于页 —— 占位简介，编辑下方文案。
+import Layout from '../layouts/Layout.astro';
+import { siteConfig } from '../site.config';
+---
+
+<Layout title="About" description="About the artist — 关于">
+  <section class="section">
+    <div class="container narrow">
+      <p class="eyebrow">About</p>
+      <h1 class="h1">{siteConfig.title}</h1>
+
+      <!-- PLACEHOLDER: replace the bio below with real text -->
+      <div class="stack bio">
+        <p>
+          [PLACEHOLDER] Photographer and designer based in China. Working across landscape, urban
+          and portrait photography, and visual identity design.
+        </p>
+        <p>[占位文案] 摄影师与设计师。作品涵盖风景、城市与人像摄影，以及视觉识别设计。</p>
+        <p class="muted">
+          For commissions and collaborations, contact:
+          <a class="mail" href="mailto:hello@example.com">hello@example.com</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .narrow {
+    max-width: 640px;
+  }
+
+  .bio {
+    margin-top: var(--space-6);
+    font-size: 17px;
+    color: var(--fg-secondary);
+    text-wrap: pretty;
+  }
+
+  .mail {
+    color: var(--fg);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .mail:hover {
+    color: var(--fg-secondary);
+    border-color: var(--fg-secondary);
+  }
+</style>

@@ -1,0 +1,107 @@
+---
+// Homepage — hero + featured works + latest works.
+// 首页 —— 巨幅标题 + 精选作品 + 最新作品。
+import Layout from '../layouts/Layout.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { getCollection } from 'astro:content';
+import { siteConfig } from '../site.config';
+
+const allWorks = await getCollection('works', ({ data }) => data.featured === false);
+// sort by date descending, then split featured / rest
+const works = (await getCollection('works')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const featured = works.filter((w) => w.data.featured).slice(0, 4);
+const recent = allWorks.sort((a, b) => b.data.date.getTime() - a.data.date.getTime()).slice(0, 4);
+// letter-level spans, like hoshimiyatoto.com (each letter is its own element)
+const heroLetters = siteConfig.title
+  .toUpperCase()
+  .split('')
+  .map((ch) => ({ ch, space: ch === ' ' }));
+---
+
+<Layout>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">Portfolio — {new Date().getFullYear()}</p>
+      <h1 class="display hero-title" aria-label={siteConfig.title.toUpperCase()}>
+        {
+          heroLetters.map(({ ch, space }) =>
+            space ? (
+              <span class="hero-space" aria-hidden="true" />
+            ) : (
+              <span class="hero-letter" aria-hidden="true">
+                {ch}
+              </span>
+            ),
+          )
+        }
+      </h1>
+      <p class="hero-tagline">{siteConfig.tagline}</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Selected Works</h2>
+        <a class="arrow-link" href="/works-presentation/works/">All Works →</a>
+      </div>
+      <div class="grid">
+        {featured.map((work) => <WorkCard work={work} large={featured.length === 2} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Latest</h2>
+        <a class="arrow-link" href="/works-presentation/works/">All Works →</a>
+      </div>
+      <div class="grid">
+        {recent.map((work) => <WorkCard work={work} />)}
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding-block: clamp(64px, 14vh, 160px) var(--space-9);
+  }
+
+  .hero-title {
+    margin: var(--space-5) 0 var(--space-6);
+  }
+
+  .hero-letter {
+    display: inline-block;
+  }
+
+  .hero-space {
+    display: inline-block;
+    width: 0.3em;
+  }
+
+  .hero-tagline {
+    font-size: clamp(15px, 1.6vw, 19px);
+    color: var(--fg-secondary);
+    margin: 0;
+    max-width: 34ch;
+    text-wrap: pretty;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-7) var(--space-6);
+  }
+
+  @media (max-width: 720px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+  }
+</style>

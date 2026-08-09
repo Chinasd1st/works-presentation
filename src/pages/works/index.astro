@@ -1,0 +1,100 @@
+---
+// Works index — all works with client-side category filter.
+// 作品列表页 —— 全部作品 + 客户端分类筛选。
+import Layout from '../../layouts/Layout.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import { getCollection } from 'astro:content';
+
+const works = (await getCollection('works')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const categories = ['all', ...new Set(works.map((w) => w.data.category))];
+---
+
+<Layout title="Works" description="All photography and design works — 全部摄影与设计作品">
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Index</p>
+      <h1>Works</h1>
+
+      <div class="filters" role="group" aria-label="Filter by category">
+        {
+          categories.map((c) => (
+            <button class="filter-btn" data-filter={c} type="button">
+              {c}
+            </button>
+          ))
+        }
+      </div>
+
+      <div class="grid" id="works-grid">
+        {works.map((work) => <WorkCard work={work} />)}
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const grid = document.getElementById('works-grid');
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('.filter-btn')];
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter ?? 'all';
+      buttons.forEach((b) => b.classList.toggle('active', b === btn));
+      grid?.querySelectorAll<HTMLElement>('.work-card').forEach((card) => {
+        const category = card.querySelector('.info')?.textContent?.split(' ')[0];
+        card.style.display = filter === 'all' || category === filter ? '' : 'none';
+      });
+    });
+  });
+</script>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-7);
+  }
+
+  .filter-btn {
+    appearance: none;
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--fg-secondary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: var(--space-1) var(--space-3);
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease);
+  }
+
+  .filter-btn:hover {
+    border-color: var(--line-strong);
+    color: var(--fg);
+  }
+
+  .filter-btn.active {
+    border-color: var(--line-strong);
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-7) var(--space-6);
+  }
+
+  @media (max-width: 720px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+  }
+</style>

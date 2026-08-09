@@ -1,0 +1,142 @@
+---
+// Core layout: fonts, theme bootstrapping, SEO, header, footer.
+// 核心布局：字体、主题初始化、SEO、页头页脚。
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import { siteConfig } from '../site.config';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const pageTitle = title ? `${title} — ${siteConfig.title}` : siteConfig.title;
+const pageDescription = description ?? siteConfig.description;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/works-presentation/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <!-- Theme bootstrap: apply stored/system theme before first paint (防闪烁) -->
+    <script is:inline>
+      (() => {
+        const stored = localStorage.getItem('theme');
+        const theme =
+          stored || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body>
+    <header>
+      <div class="container header-inner">
+        <a class="brand" href="/works-presentation/">
+          {siteConfig.title}
+        </a>
+        <nav class="nav" aria-label="Main">
+          {siteConfig.nav.map((item) => <a href={item.href}>{item.label}</a>)}
+        </nav>
+        <button
+          class="theme-toggle"
+          id="theme-toggle"
+          type="button"
+          aria-label="Toggle color theme"
+        >
+          Theme
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <span>&copy; {new Date().getFullYear()} {siteConfig.copyright}</span>
+        <span class="faint">Photography &amp; Design</span>
+      </div>
+    </footer>
+
+    <script>
+      const toggle = document.getElementById('theme-toggle');
+      toggle?.addEventListener('click', () => {
+        const html = document.documentElement;
+        const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+        html.dataset.theme = next;
+        localStorage.setItem('theme', next);
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  header {
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    height: 56px;
+  }
+
+  .brand {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .nav {
+    display: flex;
+    gap: var(--space-5);
+  }
+
+  .nav a {
+    font-size: 13px;
+    color: var(--fg-secondary);
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .nav a:hover {
+    color: var(--fg);
+  }
+
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 720px) {
+    .nav {
+      gap: var(--space-4);
+    }
+
+    .nav a {
+      font-size: 13px;
+    }
+  }
+</style>

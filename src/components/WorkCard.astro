@@ -1,0 +1,47 @@
+---
+// Work card used on the homepage and the works index.
+// 作品卡片（首页/作品列表复用）。
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  work: CollectionEntry<'works'>;
+  large?: boolean;
+}
+
+const { work, large } = Astro.props;
+const { title, category, date, cover, location } = work.data;
+const year = date.getFullYear();
+---
+
+<a
+  class={`work-card${large ? ' work-card--large' : ''}`}
+  data-cat={category}
+  href={`/works-presentation/works/${work.id}/`}
+>
+  <div class="thumb">
+    <img src={cover} alt={title} loading="lazy" />
+  </div>
+  <div class="meta">
+    <span class="title">{title}</span>
+    <span class="info">
+      {category}{location ? ` / ${location}` : ''} · {year}
+    </span>
+  </div>
+</a>
+
+<style>
+  /* aspect ratio follows the category: wide for photography, square for design
+     (reference site mixes 1.9:1 news covers with 1:1 product squares) */
+  .work-card[data-cat='photography'] .thumb,
+  .work-card[data-cat='illustration'] .thumb {
+    aspect-ratio: 3 / 2;
+  }
+
+  .work-card[data-cat='design'] .thumb {
+    aspect-ratio: 1 / 1;
+  }
+
+  .work-card--large .thumb {
+    aspect-ratio: 16 / 10;
+  }
+</style>
