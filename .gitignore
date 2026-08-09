@@ -26,3 +26,6 @@ yarn-error.log*
 
 # Untracked working drafts
 works/
+
+# Untracked working drafts at repo root
+/works/
