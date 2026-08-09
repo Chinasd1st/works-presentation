@@ -1,10 +1,11 @@
-allowBuilds:
-  esbuild: set this to true or false
-
 # pnpm workspace & settings (pnpm 11+ reads config from here, not package.json)
 # pnpm 11+ 的配置从这里读取（package.json 中的 pnpm 字段已废弃）
-onlyBuiltDependencies:
-  - esbuild
+#
+# pnpm 11 renamed onlyBuiltDependencies -> allowBuilds.
+# allowBuilds 允许指定的包执行 postinstall 构建脚本（esbuild 等）。
+allowBuilds:
+  '0': esbuild
+  esbuild: false
 
 # astro check triggers `pnpm install` before running; keep it quiet
 # astro check 运行前会自动执行 pnpm install，这里关闭以避免中断
