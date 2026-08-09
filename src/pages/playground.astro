@@ -1,0 +1,637 @@
+---
+// Playground — interactive reference for hero "SILENTNRTX" styles.
+// 测试页 —— hero 字样样式参考实验室（颜色/字体/风格/动画实时可调）。
+import '@fontsource-variable/geist-mono';
+import '@fontsource/geist-pixel';
+import Layout from '../layouts/Layout.astro';
+import { siteConfig } from '../site.config';
+
+const heroText = siteConfig.title.toUpperCase();
+
+const swatches = [
+  { name: 'Black', value: '#0a0a0a' },
+  { name: 'White', value: '#f5f5f5' },
+  { name: 'Gray', value: '#9c9c9c' },
+  { name: 'Red', value: '#ff3b30' },
+  { name: 'Orange', value: '#ff9500' },
+  { name: 'Yellow', value: '#ffd60a' },
+  { name: 'Green', value: '#30d158' },
+  { name: 'Teal', value: '#64d2ff' },
+  { name: 'Cyan', value: '#00e5ff' },
+  { name: 'Blue', value: '#0a84ff' },
+  { name: 'Purple', value: '#bf5af2' },
+  { name: 'Pink', value: '#ff375f' },
+];
+---
+
+<Layout title="Playground" description="Hero style reference — 字样样式参考">
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Playground</p>
+      <h1>Hero Style Lab</h1>
+      <p class="hint">
+        Click a preset below or tweak the controls — the stage updates live.
+        点击下方预设或调整控件，舞台实时更新。
+      </p>
+
+      <div class="stage" id="stage">
+        <h1 class="preview" id="preview">{heroText}</h1>
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <h2 class="group-title">Type</h2>
+          <label>
+            Font
+            <select id="c-font">
+              <option value="geist">Geist</option>
+              <option value="mono">Geist Mono</option>
+              <option value="pixel">Geist Pixel</option>
+              <option value="serif">Serif</option>
+            </select>
+          </label>
+          <label>
+            Case
+            <select id="c-case">
+              <option value="upper">UPPERCASE</option>
+              <option value="lower">lowercase</option>
+              <option value="none">As-is</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <h2 class="group-title">Scale</h2>
+          <label>
+            Size <span class="val" data-for="size">200</span>px
+            <input id="c-size" type="range" min="48" max="360" value="200" step="2" />
+          </label>
+          <label>
+            Weight <span class="val" data-for="weight">500</span>
+            <input id="c-weight" type="range" min="300" max="900" value="500" step="100" />
+          </label>
+          <label>
+            Letter-spacing <span class="val" data-for="ls">0</span>em
+            <input id="c-ls" type="range" min="-0.05" max="0.5" value="0" step="0.01" />
+          </label>
+          <label>
+            Line-height <span class="val" data-for="lh">0.8</span>
+            <input id="c-lh" type="range" min="0.6" max="1.5" value="0.8" step="0.05" />
+          </label>
+        </div>
+
+        <div class="control-group">
+          <h2 class="group-title">Color</h2>
+          <p class="sub">Text</p>
+          <div class="swatches" id="sw-fg" role="group" aria-label="Text color"></div>
+          <p class="sub">Background</p>
+          <div class="swatches" id="sw-bg" role="group" aria-label="Background color">
+            <button class="swatch none" data-value="none" aria-label="None">∅</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h2 class="group-title">Style</h2>
+          <label class="check">
+            <input id="c-stroke" type="checkbox" />
+            Outline (stroke)
+          </label>
+          <label class="check">
+            <input id="c-glow" type="checkbox" />
+            Neon glow
+          </label>
+          <label class="check">
+            <input id="c-anim" type="checkbox" />
+            Scramble entrance
+          </label>
+          <button class="replay" id="c-replay" type="button">Replay scramble</button>
+        </div>
+      </div>
+
+      <h2 class="presets-title">Presets</h2>
+      <div class="presets" id="presets"></div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { animate, scrambleText } from 'animejs';
+
+  const HERO_TEXT = 'SILENTNRTX';
+  const stage = document.getElementById('stage') as HTMLElement;
+  const preview = document.getElementById('preview') as HTMLElement;
+
+  type Preset = {
+    label: string;
+    font: 'geist' | 'mono' | 'pixel' | 'serif';
+    size: number;
+    weight: number;
+    ls: number;
+    lh: number;
+    textCase: string;
+    fg: string;
+    bg: string;
+    stroke: boolean;
+    glow: boolean;
+    anim: boolean;
+  };
+
+  const fonts: Record<string, string> = {
+    geist: "'Geist Variable', 'Geist', sans-serif",
+    mono: "'Geist Mono Variable', 'Geist Mono', monospace",
+    pixel: "'Geist Pixel', monospace",
+    serif: "Georgia, 'Times New Roman', serif",
+  };
+
+  const presets: Preset[] = [
+    {
+      label: 'Editorial',
+      font: 'geist',
+      size: 210,
+      weight: 500,
+      ls: 0,
+      lh: 0.8,
+      textCase: 'upper',
+      fg: '#0a0a0a',
+      bg: 'none',
+      stroke: false,
+      glow: false,
+      anim: false,
+    },
+    {
+      label: 'Mono Grid',
+      font: 'mono',
+      size: 170,
+      weight: 400,
+      ls: 0.25,
+      lh: 1,
+      textCase: 'upper',
+      fg: '#0a0a0a',
+      bg: 'none',
+      stroke: false,
+      glow: false,
+      anim: false,
+    },
+    {
+      label: 'Pixel',
+      font: 'pixel',
+      size: 230,
+      weight: 400,
+      ls: 0.06,
+      lh: 0.9,
+      textCase: 'upper',
+      fg: '#0a0a0a',
+      bg: 'none',
+      stroke: false,
+      glow: false,
+      anim: false,
+    },
+    {
+      label: 'Serif',
+      font: 'serif',
+      size: 180,
+      weight: 400,
+      ls: -0.02,
+      lh: 1.05,
+      textCase: 'none',
+      fg: '#0a0a0a',
+      bg: 'none',
+      stroke: false,
+      glow: false,
+      anim: false,
+    },
+    {
+      label: 'Heavy',
+      font: 'geist',
+      size: 250,
+      weight: 900,
+      ls: -0.04,
+      lh: 0.8,
+      textCase: 'upper',
+      fg: '#f5f5f5',
+      bg: '#0a0a0a',
+      stroke: false,
+      glow: false,
+      anim: false,
+    },
+    {
+      label: 'Outline',
+      font: 'geist',
+      size: 200,
+      weight: 700,
+      ls: 0.02,
+      lh: 0.85,
+      textCase: 'upper',
+      fg: '#0a0a0a',
+      bg: '#f5f5f5',
+      stroke: true,
+      glow: false,
+      anim: false,
+    },
+    {
+      label: 'Neon',
+      font: 'mono',
+      size: 190,
+      weight: 400,
+      ls: 0.1,
+      lh: 0.9,
+      textCase: 'upper',
+      fg: '#00e5ff',
+      bg: '#0a0a0a',
+      stroke: false,
+      glow: true,
+      anim: false,
+    },
+    {
+      label: 'Scramble',
+      font: 'mono',
+      size: 200,
+      weight: 400,
+      ls: 0.08,
+      lh: 0.9,
+      textCase: 'upper',
+      fg: '#0a0a0a',
+      bg: 'none',
+      stroke: false,
+      glow: false,
+      anim: true,
+    },
+  ];
+
+  const controls = {
+    font: document.getElementById('c-font') as HTMLSelectElement,
+    textCase: document.getElementById('c-case') as HTMLSelectElement,
+    size: document.getElementById('c-size') as HTMLInputElement,
+    weight: document.getElementById('c-weight') as HTMLInputElement,
+    ls: document.getElementById('c-ls') as HTMLInputElement,
+    lh: document.getElementById('c-lh') as HTMLInputElement,
+    stroke: document.getElementById('c-stroke') as HTMLInputElement,
+    glow: document.getElementById('c-glow') as HTMLInputElement,
+    anim: document.getElementById('c-anim') as HTMLInputElement,
+  };
+
+  let fg = '#0a0a0a';
+  let bg = 'none';
+
+  function apply(p: Partial<Preset> = {}) {
+    const font = p.font ?? (controls.font.value as Preset['font']);
+    const size = p.size ?? Number(controls.size.value);
+    const weight = p.weight ?? Number(controls.weight.value);
+    const ls = p.ls ?? Number(controls.ls.value);
+    const lh = p.lh ?? Number(controls.lh.value);
+    const textCase = p.textCase ?? controls.textCase.value;
+    fg = p.fg ?? fg;
+    bg = p.bg ?? bg;
+    const stroke = p.stroke ?? controls.stroke.checked;
+    const glow = p.glow ?? controls.glow.checked;
+
+    const style = preview.style;
+    style.fontFamily = fonts[font];
+    style.fontSize = `${size}px`;
+    style.fontWeight = String(weight);
+    style.letterSpacing = `${ls}em`;
+    style.lineHeight = String(lh);
+    style.textTransform = textCase;
+    style.color = stroke ? 'transparent' : fg;
+    style.webkitTextStroke = stroke ? `2px ${fg}` : 'none';
+    style.textShadow = glow ? `0 0 20px ${fg}, 0 0 50px ${fg}` : 'none';
+    stage.style.backgroundColor = bg === 'none' ? 'transparent' : bg;
+    stage.style.setProperty('--stage-fg', fg);
+
+    document.querySelectorAll('.val').forEach((el) => {
+      const attr = el.getAttribute('data-for');
+      const map: Record<string, string> = {
+        size: String(size),
+        weight: String(weight),
+        ls: String(ls),
+        lh: String(lh),
+      };
+      if (attr) el.textContent = map[attr];
+    });
+  }
+
+  function syncControls(p: Preset) {
+    controls.font.value = p.font;
+    controls.textCase.value = p.textCase;
+    controls.size.value = String(p.size);
+    controls.weight.value = String(p.weight);
+    controls.ls.value = String(p.ls);
+    controls.lh.value = String(p.lh);
+    controls.stroke.checked = p.stroke;
+    controls.glow.checked = p.glow;
+    controls.anim.checked = p.anim;
+  }
+
+  function playScramble() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    animate(preview, {
+      innerHTML: scrambleText({
+        text: HERO_TEXT,
+        chars: 'a-zA-Z0-9#%&@',
+        from: 'left',
+        revealRate: 50,
+        settleRate: 30,
+        settleDuration: 300,
+        perturbation: 0.3,
+        duration: 1200,
+      }),
+    });
+  }
+
+  // wire controls
+  [
+    controls.font,
+    controls.textCase,
+    controls.size,
+    controls.weight,
+    controls.ls,
+    controls.lh,
+    controls.stroke,
+    controls.glow,
+  ].forEach((el) => el.addEventListener('input', () => apply()));
+
+  controls.anim.addEventListener('change', () => {
+    if (controls.anim.checked) playScramble();
+  });
+  document.getElementById('c-replay')?.addEventListener('click', playScramble);
+
+  // swatches
+  const swatchData = JSON.parse(
+    document.getElementById('swatches-data')?.textContent ?? '[]',
+  ) as { name: string; value: string }[];
+  const fgBox = document.getElementById('sw-fg') as HTMLElement;
+  const bgBox = document.getElementById('sw-bg') as HTMLElement;
+  swatchData.forEach((s) => {
+    const mk = () => {
+      const b = document.createElement('button');
+      b.className = 'swatch';
+      b.style.background = s.value;
+      b.setAttribute('aria-label', s.name);
+      return b;
+    };
+    const f = mk();
+    f.addEventListener('click', () => {
+      fg = s.value;
+      apply();
+    });
+    fgBox.appendChild(f);
+    const b = mk();
+    b.addEventListener('click', () => {
+      bg = s.value;
+      apply();
+    });
+    bgBox.appendChild(b);
+  });
+  (bgBox.querySelector('.swatch.none') as HTMLElement).addEventListener('click', () => {
+    bg = 'none';
+    apply();
+  });
+
+  // presets
+  const presetBox = document.getElementById('presets') as HTMLElement;
+  presets.forEach((p) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'preset-card';
+    const label = document.createElement('span');
+    label.className = 'preset-label';
+    label.textContent = p.label;
+    const thumb = document.createElement('span');
+    thumb.className = 'preset-thumb';
+    thumb.textContent = HERO_TEXT;
+    thumb.style.fontFamily = fonts[p.font];
+    thumb.style.fontWeight = String(p.weight);
+    thumb.style.letterSpacing = `${p.ls}em`;
+    thumb.style.color = p.stroke ? 'transparent' : p.fg;
+    thumb.style.webkitTextStroke = p.stroke ? `1.5px ${p.fg}` : 'none';
+    card.style.background = p.bg === 'none' ? 'transparent' : p.bg;
+    card.appendChild(label);
+    card.appendChild(thumb);
+    card.addEventListener('click', () => {
+      syncControls(p);
+      apply(p);
+      if (p.anim) playScramble();
+    });
+    presetBox.appendChild(card);
+  });
+
+  // initial state = Editorial preset
+  syncControls(presets[0]);
+  apply(presets[0]);
+</script>
+
+<script is:inline>
+  // inject swatch data for the module script above
+  (() => {
+    const data = [
+      { name: 'Black', value: '#0a0a0a' },
+      { name: 'White', value: '#f5f5f5' },
+      { name: 'Gray', value: '#9c9c9c' },
+      { name: 'Red', value: '#ff3b30' },
+      { name: 'Orange', value: '#ff9500' },
+      { name: 'Yellow', value: '#ffd60a' },
+      { name: 'Green', value: '#30d158' },
+      { name: 'Teal', value: '#64d2ff' },
+      { name: 'Cyan', value: '#00e5ff' },
+      { name: 'Blue', value: '#0a84ff' },
+      { name: 'Purple', value: '#bf5af2' },
+      { name: 'Pink', value: '#ff375f' },
+    ];
+    const el = document.createElement('script');
+    el.id = 'swatches-data';
+    el.type = 'application/json';
+    el.textContent = JSON.stringify(data);
+    document.body.appendChild(el);
+  })();
+</script>
+
+<style>
+  .hint {
+    color: var(--fg-secondary);
+    margin: 0 0 var(--space-6);
+    text-wrap: pretty;
+  }
+
+  /* ---------- Stage ---------- */
+
+  .stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 380px;
+    padding: var(--space-7) var(--space-6);
+    border-radius: 4px;
+    background-color: transparent;
+    transition: background-color var(--dur) var(--ease);
+  }
+
+  .preview {
+    margin: 0;
+    font-size: 200px;
+    font-weight: 500;
+    line-height: 0.8;
+    letter-spacing: normal;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  /* ---------- Controls ---------- */
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-5);
+    margin-top: var(--space-7);
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .group-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-faint);
+  }
+
+  .controls label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: 12px;
+    color: var(--fg-secondary);
+  }
+
+  .controls select,
+  .controls input[type='range'] {
+    font-family: inherit;
+    color: var(--fg);
+    background: var(--bg-muted);
+    border: none;
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .controls .check {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .val {
+    font-family: inherit;
+    color: var(--fg);
+  }
+
+  .sub {
+    margin: 0;
+    font-size: 12px;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 20%, transparent);
+    transition: transform var(--dur-fast) var(--ease);
+  }
+
+  .swatch:hover {
+    transform: scale(1.15);
+  }
+
+  .swatch.none {
+    background: repeating-conic-gradient(var(--bg-muted) 0 25%, var(--line) 0 50%);
+  }
+
+  .replay {
+    margin-top: var(--space-1);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--fg);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: left;
+  }
+
+  .replay:hover {
+    opacity: 0.6;
+  }
+
+  /* ---------- Presets ---------- */
+
+  .presets-title {
+    margin-top: var(--space-8);
+  }
+
+  .presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+  }
+
+  .preset-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: flex-start;
+    padding: var(--space-4);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 4px;
+    transition: background-color var(--dur-fast) var(--ease);
+  }
+
+  .preset-card:hover {
+    background: var(--bg-muted);
+  }
+
+  .preset-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg-secondary);
+  }
+
+  .preset-thumb {
+    font-size: 28px;
+    line-height: 1;
+    text-transform: uppercase;
+    text-wrap: nowrap;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  @media (max-width: 900px) {
+    .presets {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stage {
+      min-height: 260px;
+      padding: var(--space-5) var(--space-4);
+    }
+  }
+</style>
