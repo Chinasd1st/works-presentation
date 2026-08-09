@@ -2,10 +2,18 @@
 // Core layout: fonts, theme bootstrapping, SEO, header, footer.
 // 核心布局：字体、主题初始化、SEO、页头页脚。
 import '@fontsource-variable/geist';
-import '@fontsource-variable/geist-mono';
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import { siBilibili, siGithub, siRss } from 'simple-icons';
 import { siteConfig } from '../site.config';
+
+// Brand icons (simple-icons) per social label. Official brand marks:
+// Bilibili and GitHub have real icons here, unlike Lucide.
+const socialIcons: Record<string, string> = {
+  Blog: siRss.path,
+  Bilibili: siBilibili.path,
+  GitHub: siGithub.path,
+};
 
 interface Props {
   title?: string;
@@ -63,18 +71,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <ClientRouter />
   </head>
   <body>
-    <header>
-      <div class="container header-inner">
-        <a class="brand" href={import.meta.env.BASE_URL}>
-          {siteConfig.title}
-        </a>
-        <nav class="nav" aria-label="Main">
-          {siteConfig.nav.map((item) => (
-            <a href={`${import.meta.env.BASE_URL}${item.href.replace(/^\//, '')}`}>
-              {item.label}
-            </a>
-          ))}
-        </nav>
+    <aside class="sidebar">
+      <a class="brand" href={import.meta.env.BASE_URL}>
+        {siteConfig.title}
+      </a>
+      <nav class="nav" aria-label="Main">
+        {siteConfig.nav.map((item) => (
+          <a href={`${import.meta.env.BASE_URL}${item.href.replace(/^\//, '')}`}>
+            {item.label}
+          </a>
+        ))}
+      </nav>
+      <div class="sidebar-foot">
         <button
           class="theme-toggle"
           id="theme-toggle"
@@ -85,72 +93,144 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           Theme
         </button>
       </div>
-    </header>
+    </aside>
 
-    <main id="main">
-      <slot />
-    </main>
+    <div class="page">
+      <main id="main">
+        <slot />
+      </main>
 
-    <footer>
-      <div class="container footer-inner">
-        <span>&copy; {new Date().getFullYear()} {siteConfig.copyright}</span>
-        <span class="faint">Photography &amp; Design</span>
-      </div>
-    </footer>
+      <footer>
+        <div class="container footer-inner">
+          <span>&copy; {new Date().getFullYear()} {siteConfig.copyright}</span>
+          <nav class="social" aria-label="Social links">
+            {siteConfig.social.map((s) => (
+              <a href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d={socialIcons[s.label]} />
+                </svg>
+              </a>
+            ))}
+          </nav>
+          <span class="faint">Photography &amp; Design</span>
+        </div>
+      </footer>
+    </div>
   </body>
 </html>
 
 <style>
-  header {
-    border-bottom: 1px solid var(--line);
+  /* ---------- Sidebar (fixed left rail, hoshimiyatoto-style) ---------- */
+
+  .sidebar {
     position: sticky;
     top: 0;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: blur(8px);
-    z-index: 10;
-  }
-
-  .header-inner {
+    align-self: start;
+    height: 100vh;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: space-between;
-    gap: var(--space-4);
-    height: 56px;
+    gap: var(--space-7);
+    padding: var(--space-6) clamp(20px, 2.4vw, 40px);
+    box-sizing: border-box;
   }
 
   .brand {
     font-weight: 600;
-    letter-spacing: -0.01em;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   .nav {
     display: flex;
-    gap: var(--space-5);
+    flex-direction: column;
+    gap: var(--space-3);
   }
 
   .nav a {
-    font-size: 13px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
     color: var(--fg-secondary);
-    transition: color var(--dur-fast) var(--ease);
+    transition:
+      color var(--dur-fast) var(--ease),
+      letter-spacing var(--dur-fast) var(--ease);
   }
 
   .nav a:hover {
     color: var(--fg);
+    letter-spacing: 0.16em;
   }
+
+  .sidebar-foot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .theme-toggle {
+    text-align: left;
+  }
+
+  .page {
+    min-width: 0;
+  }
+
+  /* ---------- Footer ---------- */
 
   .footer-inner {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: var(--space-4);
   }
 
-  @media (max-width: 720px) {
+  .social {
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  .social a {
+    display: inline-flex;
+    color: var(--fg-secondary);
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .social a:hover {
+    color: var(--fg);
+  }
+
+  @media (max-width: 900px) {
+    /* Sidebar collapses into a top bar on small screens.
+       移动端侧栏折叠为顶部横排。 */
+    .sidebar {
+      position: static;
+      height: auto;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: var(--space-4) clamp(20px, 4vw, 40px);
+    }
+
+    .sidebar-foot {
+      display: none;
+    }
+
     .nav {
+      flex-direction: row;
       gap: var(--space-4);
     }
 
     .nav a {
-      font-size: 13px;
+      font-size: 12px;
     }
   }
 </style>

@@ -21,5 +21,9 @@ export const siteConfig = {
   ],
   // External links (social / contact)
   // 外部链接
-  social: [] as { label: string; href: string }[],
+  social: [
+    { label: 'Blog', href: 'https://silentnrtx.top' },
+    { label: 'Bilibili', href: 'https://space.bilibili.com/?spm_id_from=333.1007.0.0' },
+    { label: 'GitHub', href: 'https://github.com/chinasd1st' },
+  ],
 } as const;
