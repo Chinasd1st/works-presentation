@@ -6,16 +6,15 @@ import { assetUrl } from '../lib/assetUrl';
 
 interface Props {
   work: CollectionEntry<'works'>;
-  large?: boolean;
 }
 
-const { work, large } = Astro.props;
+const { work } = Astro.props;
 const { title, category, date, cover, location } = work.data;
 const year = date.getFullYear();
 ---
 
 <a
-  class={`work-card${large ? ' work-card--large' : ''}`}
+  class="work-card"
   data-cat={category}
   href={`${import.meta.env.BASE_URL}works/${work.id}/`}
 >
@@ -29,20 +28,3 @@ const year = date.getFullYear();
     </span>
   </div>
 </a>
-
-<style>
-  /* aspect ratio follows the category: wide for photography, square for design
-     (reference site mixes 1.9:1 news covers with 1:1 product squares) */
-  .work-card[data-cat='photography'] .thumb,
-  .work-card[data-cat='illustration'] .thumb {
-    aspect-ratio: 3 / 2;
-  }
-
-  .work-card[data-cat='design'] .thumb {
-    aspect-ratio: 1 / 1;
-  }
-
-  .work-card--large .thumb {
-    aspect-ratio: 16 / 10;
-  }
-</style>
