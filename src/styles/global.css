@@ -17,7 +17,6 @@
 
   /* Typography */
   --font-sans: 'Geist Variable', 'Geist', -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif;
-  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'Cascadia Code', monospace;
 
   /* Spacing — 4px base */
   --space-1: 4px;
@@ -147,7 +146,6 @@ h3,
 }
 
 .eyebrow {
-  font-family: var(--font-mono);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -171,7 +169,6 @@ h3,
 
 .section-head {
   margin-bottom: var(--space-7);
-  border-top: 1px solid var(--line);
   padding-top: var(--space-4);
 }
 
@@ -200,16 +197,14 @@ h3,
 }
 
 .work-card .thumb {
-  aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--bg-muted);
-  border: 1px solid var(--line);
 }
 
 .work-card .thumb img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  display: block;
   transition: transform 0.6s var(--ease);
 }
 
@@ -231,7 +226,6 @@ h3,
 
 .work-card .meta .info {
   color: var(--fg-secondary);
-  font-family: var(--font-mono);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -246,7 +240,6 @@ h3,
   padding: var(--space-1);
   cursor: pointer;
   color: var(--fg);
-  font-family: var(--font-mono);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -274,6 +267,41 @@ h3,
 
 .nowrap {
   white-space: nowrap;
+}
+
+/* ---------- Custom scrollbar (minimal, follows theme) ---------- */
+
+html {
+  /* Reserve scrollbar space so content doesn't shift when the
+     scrollbar appears/disappears during route changes.
+     预留滚动条空间，避免路由切换时内容水平偏移。 */
+  scrollbar-gutter: stable;
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--fg-faint) transparent;
+}
+
+/* WebKit (Chrome / Edge / Safari) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fg-faint);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-secondary);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* ---------- Footer (borderless, minimal — like the reference) ---------- */
