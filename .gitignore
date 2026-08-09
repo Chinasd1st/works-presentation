@@ -1,4 +1,4 @@
-# build output
+﻿# build output
 dist/
 # generated types
 .astro/
@@ -25,7 +25,6 @@ yarn-error.log*
 !.vscode/extensions.json
 
 # Untracked working drafts
-works/
 
 # Untracked working drafts at repo root
 /works/
