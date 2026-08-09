@@ -27,18 +27,29 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={pageDescription} />
     <meta name="generator" content={Astro.generator} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href="/works-presentation/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonical} />
-    <!-- Theme bootstrap: apply stored/system theme before first paint (防闪烁) -->
+    <!-- Theme bootstrap + toggle handler.
+         Must be is:inline + global function: View Transitions replaces the DOM
+         on navigation, so event listeners attached to elements are lost.
+         必须用内联脚本 + 全局函数：View Transitions 导航会替换 DOM，
+         绑定在元素上的监听器会丢失。 -->
     <script is:inline>
       (() => {
         const stored = localStorage.getItem('theme');
         const theme =
           stored || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.dataset.theme = theme;
+
+        window.toggleTheme = () => {
+          const html = document.documentElement;
+          const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+          html.dataset.theme = next;
+          localStorage.setItem('theme', next);
+        };
       })();
     </script>
     <ClientRouter />
@@ -46,7 +57,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <body>
     <header>
       <div class="container header-inner">
-        <a class="brand" href="/works-presentation/">
+        <a class="brand" href={import.meta.env.BASE_URL}>
           {siteConfig.title}
         </a>
         <nav class="nav" aria-label="Main">
@@ -57,6 +68,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           id="theme-toggle"
           type="button"
           aria-label="Toggle color theme"
+          onclick="toggleTheme()"
         >
           Theme
         </button>
@@ -73,16 +85,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         <span class="faint">Photography &amp; Design</span>
       </div>
     </footer>
-
-    <script>
-      const toggle = document.getElementById('theme-toggle');
-      toggle?.addEventListener('click', () => {
-        const html = document.documentElement;
-        const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
-        html.dataset.theme = next;
-        localStorage.setItem('theme', next);
-      });
-    </script>
   </body>
 </html>
 
