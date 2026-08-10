@@ -2,9 +2,8 @@
 // Work detail page — large cover + metadata + markdown body.
 // 作品详情页 —— 大图 + 元信息 + Markdown 正文。
 import Layout from '../../layouts/Layout.astro';
+import { Image } from 'astro:assets';
 import { getCollection, render } from 'astro:content';
-import { assetUrl } from '../../lib/assetUrl';
-import { rehypeAssetBase } from '../../lib/rehypeAssetBase';
 
 export async function getStaticPaths() {
   const works = await getCollection('works');
@@ -20,7 +19,7 @@ interface Props {
 
 const { work } = Astro.props;
 const { title, category, date, cover, tags, location, description } = work.data;
-const { Content } = await render(work, { rehypePlugins: [rehypeAssetBase] });
+const { Content } = await render(work);
 
 const year = date.getFullYear();
 const dateLabel = date.toLocaleDateString('en-US', {
@@ -34,7 +33,7 @@ const dateLabel = date.toLocaleDateString('en-US', {
   <article class="section work-detail">
     <div class="container">
       <figure class="cover">
-        <img src={assetUrl(cover)} alt={title} />
+        <Image src={cover} alt={title} width={1200} height={400} format="webp" />
         <figcaption class="work-head">
           <p class="eyebrow">
             {category}{location ? ` / ${location}` : ''} · {year}
@@ -77,6 +76,10 @@ const dateLabel = date.toLocaleDateString('en-US', {
       img.addEventListener('click', () => {
         const overlay = document.createElement('div');
         overlay.className = 'lightbox';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Image viewer');
+        overlay.tabIndex = -1;
         const full = document.createElement('img');
         full.src = img.src;
         full.alt = img.alt;
@@ -84,18 +87,43 @@ const dateLabel = date.toLocaleDateString('en-US', {
         document.body.appendChild(overlay);
         document.body.classList.add('lightbox-open');
         document.body.style.overflow = 'hidden';
+        overlay.focus();
 
         const close = () => {
           overlay.remove();
           document.body.classList.remove('lightbox-open');
           document.body.style.overflow = '';
           document.removeEventListener('keydown', onKey);
+          document.removeEventListener('keydown', trapFocus);
+          img.focus();
+        };
+        // Focus trap: Tab cycles within the dialog only.
+        // 焦点圈定：Tab 只在对话框内循环。
+        const trapFocus = (e: KeyboardEvent) => {
+          if (e.key !== 'Tab') return;
+          const focusables = overlay.querySelectorAll<HTMLElement>(
+            'a[href], button, [tabindex]:not([tabindex="-1"])',
+          );
+          if (focusables.length === 0) {
+            e.preventDefault();
+            return;
+          }
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
         };
         const onKey = (e: KeyboardEvent) => {
           if (e.key === 'Escape') close();
         };
         overlay.addEventListener('click', close);
         document.addEventListener('keydown', onKey);
+        document.addEventListener('keydown', trapFocus);
       });
     });
   }

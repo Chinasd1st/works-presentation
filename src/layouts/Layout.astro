@@ -1,7 +1,9 @@
 ---
 // Core layout: fonts, theme bootstrapping, SEO, header, footer.
 // 核心布局：字体、主题初始化、SEO、页头页脚。
-import '@fontsource-variable/geist';
+// Geist latin subset only (no cyrillic/vietnamese) to cut font payload.
+// 仅引入 Geist latin 子集，减小字体体积。
+import geistLatinWoff2 from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
 import { siBilibili, siGithub, siOsu, siRss } from 'simple-icons';
@@ -26,6 +28,16 @@ const { title, description } = Astro.props;
 const pageTitle = title ? `${title} — ${siteConfig.title}` : siteConfig.title;
 const pageDescription = description ?? siteConfig.description;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// Geist Variable, latin subset only — 仅 latin 子集。
+const geistFontFace = `
+@font-face {
+  font-family: 'Geist Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('${geistLatinWoff2}') format('woff2-variations');
+}`;
 ---
 
 <!doctype html>
@@ -42,6 +54,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonical} />
+    <style is:inline set:html={geistFontFace} />
     <!-- Theme bootstrap + toggle handler.
          Must be is:inline + global function: View Transitions replaces the DOM
          on navigation, so event listeners attached to elements are lost.
@@ -186,6 +199,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
   .page {
     min-width: 0;
+    /* Flex column so the footer pins to the bottom of short pages
+       (e.g. the 404 page). 短页面（如 404）时 footer 固定在底部。 */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .page main {
+    flex: 1;
   }
 
   /* ---------- Footer ---------- */

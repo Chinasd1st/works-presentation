@@ -1,0 +1,51 @@
+---
+// 404 — not found, styled like the rest of the site.
+// 404 页面：与站点风格统一。
+import Layout from '../layouts/Layout.astro';
+
+const symbols = ['+', '×'];
+const sym = symbols[Math.floor(Math.random() * symbols.length)];
+---
+
+<Layout title="404" description="Page not found — 页面不存在">
+  <section class="section notfound">
+    <div class="container narrow">
+      <p class="eyebrow">Error {sym} 404</p>
+      <h1 class="h2">Page Not Found</h1>
+      <p class="hint">
+        The page you are looking for does not exist or has moved.
+        你访问的页面不存在或已被移动。
+      </p>
+      <a class="back" href={import.meta.env.BASE_URL}>← Back to Home</a>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .narrow {
+    max-width: 640px;
+  }
+
+  .hint {
+    margin: var(--space-5) 0 0;
+    color: var(--fg-secondary);
+    font-size: 17px;
+    text-wrap: pretty;
+  }
+
+  .back {
+    display: inline-block;
+    margin-top: var(--space-6);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--fg);
+    border-bottom: 1px solid var(--fg);
+    padding-bottom: 2px;
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+
+  .back:hover {
+    opacity: 0.6;
+  }
+</style>

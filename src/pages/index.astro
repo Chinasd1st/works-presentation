@@ -69,7 +69,7 @@ const heroLetters = siteConfig.title
         <span class="section-sym" aria-hidden="true"></span>
       </div>
       <div class="grid">
-        {featured.map((work) => <WorkCard work={work} />)}
+        {featured.map((work, i) => <WorkCard work={work} priority={i === 0} />)}
       </div>
     </div>
   </section>

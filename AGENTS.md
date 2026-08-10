@@ -31,8 +31,7 @@
 - **命令**：`pnpm dev` / `pnpm build` / `pnpm check` / `pnpm lint`。改动后必须 `pnpm build` 验证。
 - **编码（Windows）**：文件写入一律用编辑工具（保持 UTF-8）。**禁用 PowerShell 进行文件操作/批量替换**（`-replace`/`Set-Content` 曾破坏 UTF-8 中文注释，见历史事故）；确需批量替换时用 **node 脚本**（读文件为 Buffer/UTF-8，写回时保持 UTF-8 无 BOM）。
 - **拍摄日期**：创建作品 markdown 时，拍摄时间优先读图片 EXIF（DateTimeOriginal）；无 EXIF 时用文件创建时间；不得凭主观猜测。
-- **路径**：所有资源引用须拼 `import.meta.env.BASE_URL`（见现有组件写法）。public 下文件名统一小写扩展名（Windows 大小写不敏感会导致构建 `ImageNotFound`）。
-- **已知预存错误（勿擅自修改）**：`src/lib/rehypeAssetBase.ts` 的 `hast`/`unified` 类型缺失；`src/pages/works/[slug].astro` 的 `render()` 双参签名。除非用户明确要求修复。
+- **路径**：所有资源引用须拼 `import.meta.env.BASE_URL`（见现有组件写法）。public 下文件名统一小写扩展名（Windows 大小写不敏感会导致构建 `ImageNotFound`）。markdown 正文图片路径须**手写完整 base 前缀**（如 `/works-presentation/works/...`，Astro 7 默认 Sätteri 处理器无 rehype 插件管线）。
 - **内容**：`todo.md` 中的优化项需用户确认后才实施；正文/文案占位不得编造（无素材时用占位并明示）。
 
 ## 不变量

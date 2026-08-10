@@ -128,6 +128,9 @@ a {
 img {
   display: block;
   max-width: 100%;
+  /* Keep aspect ratio when max-width scales the image down.
+     宽度被 max-width 缩放时保持纵横比，避免拉伸。 */
+  height: auto;
 }
 
 /* ---------- Type scale (oversized contrast, hoshimiyatoto-style) ---------- */

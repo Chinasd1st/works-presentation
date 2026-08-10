@@ -11,6 +11,15 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...eslintPluginAstro.configs['flat/recommended'],
   {
+    // Config files run in Node (e.g. process.env in astro.config.mjs)
+    files: ['*.config.{js,mjs}', '*.config.ts'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+      },
+    },
+  },
+  {
     files: ['**/*.astro'],
     rules: {
       // Astro templates legitimately use <any> in frontmatter slots

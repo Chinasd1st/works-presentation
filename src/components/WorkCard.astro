@@ -1,16 +1,21 @@
 ---
 // Work card used on the homepage and the works index.
 // 作品卡片（首页/作品列表复用）。
+import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
-import { assetUrl } from '../lib/assetUrl';
 
 interface Props {
   work: CollectionEntry<'works'>;
+  /** Eager-load the thumbnail (first above-the-fold card). */
+  priority?: boolean;
 }
 
-const { work } = Astro.props;
+const { work, priority } = Astro.props;
 const { title, category, date, cover, location } = work.data;
 const year = date.getFullYear();
+// Cards render at most ~800px wide; output a 800px webp keeping the ratio.
+const cardWidth = 800;
+const cardHeight = Math.round((cardWidth * cover.height) / cover.width);
 ---
 
 <a
@@ -19,7 +24,15 @@ const year = date.getFullYear();
   href={`${import.meta.env.BASE_URL}works/${work.id}/`}
 >
   <div class="thumb">
-    <img src={assetUrl(cover)} alt={title} loading="lazy" />
+    <Image
+      src={cover}
+      alt={title}
+      width={cardWidth}
+      height={cardHeight}
+      format="webp"
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
+    />
   </div>
   <div class="meta">
     <span class="title">{title}</span>

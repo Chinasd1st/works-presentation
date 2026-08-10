@@ -4,17 +4,16 @@
 // 装饰性反色跑马灯条（仅首页）：图片自右向左无缝滚动，
 // 标题居右叠加（仿 cover 头图）。
 import { siteConfig } from '../site.config';
+import strip1 from '../content/works/guangzhou-scenery/DSC09663.jpg';
+import strip2 from '../content/works/guangzhou-scenery/DSC09565.jpg';
+import strip3 from '../content/works/guangzhou-scenery/DSC09570.jpg';
+import strip4 from '../content/works/guangzhou-scenery/cover.jpg';
+import strip5 from '../content/works/math-gazette-issue-2/cover.jpg';
+import strip6 from '../content/works/math-gazette-issue-2/back.jpg';
 
 // Two identical copies make the -50% translate loop seamless.
 // 两份相同序列保证 -50% 平移无缝循环。
-const stripImages = [
-  'works/guangzhou-scenery/DSC09663.jpg',
-  'works/guangzhou-scenery/DSC09565.jpg',
-  'works/guangzhou-scenery/DSC09570.jpg',
-  'works/guangzhou-scenery/cover.jpg',
-  'works/math-gazette-issue-2/cover.jpg',
-  'works/math-gazette-issue-2/back.jpg',
-].map((p) => `${import.meta.env.BASE_URL}${p}`);
+const stripImages = [strip1, strip2, strip3, strip4, strip5, strip6].map((i) => i.src);
 ---
 
 <section class="section strip-section" aria-label="Gallery">
