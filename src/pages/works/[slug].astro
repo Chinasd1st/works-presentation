@@ -72,7 +72,6 @@ const dateLabel = date.toLocaleDateString('en-US', {
     document.querySelectorAll<HTMLImageElement>('.work-body img').forEach((img) => {
       if (img.dataset.lightbox) return;
       img.dataset.lightbox = 'true';
-      img.style.cursor = 'zoom-in';
       img.addEventListener('click', () => {
         const overlay = document.createElement('div');
         overlay.className = 'lightbox';
@@ -271,7 +270,6 @@ const dateLabel = date.toLocaleDateString('en-US', {
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.92);
-    cursor: zoom-out;
     animation: lightbox-fade var(--dur) var(--ease);
   }
 
